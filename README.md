@@ -69,7 +69,7 @@ Everything lives in `docker-compose.yml`:
 - **Gated models**: copy `.env.example` to `.env`, set `HF_TOKEN` (needed for Llama 3.x or Qwen's official AWQ build).
 - **Tool calling**: add `--tool-parser qwen3_coder` to the command block for agentic coding setups (Cline, Qwen Code).
 
-When run via systemd the service runs as root, so the HF cache lands in `/root/.cache/huggingface`.
+Model weights cache to `<repo>/.cache/huggingface` on the host (gitignored), regardless of which user runs compose. Delete it to force a fresh download.
 
 ## Troubleshooting
 

@@ -11,7 +11,7 @@ services:
       HF_HOME: /root/.cache/huggingface
       HF_TOKEN: ${HF_TOKEN:-}
     volumes:
-      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./.cache/huggingface:/root/.cache/huggingface
     ports:
       - "8000:8000"
     command:
