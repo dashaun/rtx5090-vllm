@@ -1,0 +1,25 @@
+name: kintsugi-vllm
+
+services:
+  coder:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-coder
+    runtime: nvidia
+    restart: unless-stopped
+    ipc: host
+    environment:
+      HF_HOME: /root/.cache/huggingface
+      HF_TOKEN: ${HF_TOKEN:-}
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    ports:
+      - "8000:8000"
+    command:
+      - --model
+      - cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit
+      - --served-model-name
+      - qwen3-coder
+      - --max-model-len
+      - "32768"
+      - --gpu-memory-utilization
+      - "0.92"
