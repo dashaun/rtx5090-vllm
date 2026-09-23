@@ -67,7 +67,7 @@ Everything lives in `docker-compose.yml`:
 - **Swap the model**: change the `--model` line. HF models are auto-detected; add `--quantization awq` for AWQ repos.
 - **Context length**: adjust `--max-model-len`. Larger context eats more of the 32 GB.
 - **Gated models**: copy `.env.example` to `.env`, set `HF_TOKEN` (needed for Llama 3.x or Qwen's official AWQ build).
-- **Tool calling**: add `--tool-parser qwen3_coder` to the command block for agentic coding setups (Cline, Qwen Code).
+- **Tool calling**: already enabled for agentic coding setups (Cline, Qwen Code) via `--enable-auto-tool-choice` and `--tool-call-parser qwen3_coder`.
 
 Model weights cache to `<repo>/.cache/huggingface` on the host (gitignored), regardless of which user runs compose. Delete it to force a fresh download.
 
