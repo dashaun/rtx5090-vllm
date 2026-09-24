@@ -1,3 +1,9 @@
+[![Build Status](https://github.com/dashaun/rtx5090-vllm/actions/workflows/validate.yml/badge.svg)](https://github.com/dashaun/rtx5090-vllm/actions/workflows/validate.yml)
+[![Docker Size](https://img.shields.io/docker/image-size/vllm/vllm-openai/latest)](https://hub.docker.com/r/vllm/vllm-openai)
+[![License](https://img.shields.io/github/license/dashaun/rtx5090-vllm)](https://github.com/dashaun/rtx5090-vllm/blob/main/LICENSE)
+[![NVIDIA GPU](https://img.shields.io/badge/GPU-RTX_5090%2F4090-blue)](https://www.nvidia.com/en-us/geforce/rtx-5090/)
+[![vLLM](https://img.shields.io/badge/vLLM-OpenAI_API-green)](https://github.com/vllm-project/vllm)
+
 # rtx5090-vllm
 
 vLLM serving Qwen3-Coder-30B-A3B on an RTX 5090 via Docker. OpenAI-compatible API, auto-restarts on boot. This is the Ollama replacement for that box: one model, no swap logic, no keep-alive tuning.
