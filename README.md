@@ -31,7 +31,7 @@ What the script does:
 4. Installs a systemd unit pinned to this clone path
 5. Runs `docker compose up -d`
 
-First start downloads ~16 GB of weights. Give it a few minutes before the port opens.
+First start downloads ~16 GB of weights. Give it a few minutes before the port opens. The systemd unit waits for the `/health` endpoint before reporting the service as active, and the container exposes a Docker healthcheck — so a half-loaded model never counts as "up".
 
 ## Verify
 
@@ -76,3 +76,12 @@ Model weights cache to `<repo>/.cache/huggingface` on the host (gitignored), reg
 - `unknown or invalid runtime name: nvidia` — the daemon didn't load the runtime. Check `/etc/docker/daemon.json`, then `sudo systemctl restart docker`. If you're on rootless Docker, switch back to the system context (this setup doesn't support rootless).
 - `Quantization method specified in the model config (compressed-tensors) does not match ... (awq)` — the model is compressed-tensors, not AWQ. Don't pass `--quantization awq`; let vLLM auto-detect.
 - `Failed to initialize NVML: Driver/library version mismatch` — the NVIDIA driver was updated but the box wasn't rebooted. Reboot.
+
+## Links
+
+- Blog: [From Ollama to vLLM on an RTX 5090](https://dashaun.com/posts/ollama-to-vllm-on-rtx-5090/)
+- Demo: [YouTube Short](https://www.youtube.com/shorts/WQBXhzKN2KM)
+
+## License
+
+Apache-2.0
