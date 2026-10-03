@@ -13,7 +13,7 @@ vLLM serving Qwen3-Coder-30B-A3B on an RTX 5090 via Docker. OpenAI-compatible AP
 - `cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit`, served as `qwen3-coder`
 - 30B total / 3.3B active (MoE), so it stays responsive on a single consumer GPU
 - INT4 quantized (compressed-tensors, despite "AWQ" in the name), ~16 GB download, ~16-18 GB VRAM once loaded
-- 32768 token context. Native is 262144, but that leaves no room for KV cache in 32 GB
+- 98304 token context. After weights load, vLLM has ~9.8 GiB left for KV cache (~107K tokens), so 96K fits for one request at a time. Native is 262144, which does not fit on 32 GB
 
 The official Qwen AWQ build is gated behind an HF license, and the official FP8 build is ~30.5 GB with no headroom left for a 32 GB card. This one is open and auto-detected by vLLM as compressed-tensors, so no `--quantization` flag needed.
 
