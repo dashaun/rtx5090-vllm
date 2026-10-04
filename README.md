@@ -8,6 +8,10 @@
 
 vLLM serving Qwen3.8-27B on an RTX 5090 via Docker. OpenAI-compatible API with vision, auto-restarts on boot. This is the Ollama replacement for that box: one model, no swap logic, no keep-alive tuning.
 
+## Why it moved from qwen3-coder
+
+The [blog post](https://dashaun.com/posts/ollama-to-vllm-on-rtx-5090/) and the `qwen3-coder` tag in this repo document the original Qwen3-Coder-30B-A3B stack. Check out the tag if you want that exact configuration. qwen3-coder was a good fit for coding, but two things pushed me to a different model: I wanted a better, faster vision model for the image-in tasks my agents run, and I wanted a general-purpose subagent model rather than a coding-only one. qwen3.8-27b covers both. It is a dense VLM with image and video input, 128K context, and tool calling, on the same card with the same one-service setup.
+
 ## Why this model
 
 - `nvidia/Qwen3.8-27B-NVFP4`, served as `qwen3.8-27b`
