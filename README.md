@@ -37,7 +37,7 @@ What the script does:
 4. Installs a systemd unit pinned to this clone path
 5. Runs `docker compose up -d`
 
-First start downloads ~16 GB of weights. Give it a few minutes before the port opens. The systemd unit waits for the `/health` endpoint before reporting the service as active, and the container exposes a Docker healthcheck — so a half-loaded model never counts as "up".
+First start downloads ~16 GB of weights. Give it a few minutes before the port opens. The systemd unit waits for the `/health` endpoint before reporting the service as active, and the container exposes a Docker healthcheck, so a half-loaded model never counts as "up".
 
 ## Verify
 
@@ -71,7 +71,7 @@ docker compose logs -f              # vLLM engine logs
 Everything lives in `docker-compose.yml`:
 
 - **Swap the model**: change the `--model` line. HF models are auto-detected; add `--quantization awq` for AWQ repos.
-- **Context length**: adjust `--max-model-len`. Larger context eats more of the 32 GB.
+- **Context length**: adjust `--max-model-len`. vLLM reserves the KV cache from `--gpu-memory-utilization` either way, so this only caps a single request. It must fit in the `GPU KV cache size` from the startup log (`docker compose logs | grep "KV cache size"`). Your client (Cline, Qwen Code) has its own context setting; match it, leaving room for `max_tokens`.
 - **Gated models**: copy `.env.example` to `.env`, set `HF_TOKEN` (needed for Llama 3.x or Qwen's official AWQ build).
 - **Tool calling**: already enabled for agentic coding setups (Cline, Qwen Code) via `--enable-auto-tool-choice` and `--tool-call-parser qwen3_coder`.
 
@@ -79,9 +79,9 @@ Model weights cache to `<repo>/.cache/huggingface` on the host (gitignored), reg
 
 ## Troubleshooting
 
-- `unknown or invalid runtime name: nvidia` — the daemon didn't load the runtime. Check `/etc/docker/daemon.json`, then `sudo systemctl restart docker`. If you're on rootless Docker, switch back to the system context (this setup doesn't support rootless).
-- `Quantization method specified in the model config (compressed-tensors) does not match ... (awq)` — the model is compressed-tensors, not AWQ. Don't pass `--quantization awq`; let vLLM auto-detect.
-- `Failed to initialize NVML: Driver/library version mismatch` — the NVIDIA driver was updated but the box wasn't rebooted. Reboot.
+- `unknown or invalid runtime name: nvidia`: the daemon didn't load the runtime. Check `/etc/docker/daemon.json`, then `sudo systemctl restart docker`. If you're on rootless Docker, switch back to the system context (this setup doesn't support rootless).
+- `Quantization method specified in the model config (compressed-tensors) does not match ... (awq)`: the model is compressed-tensors, not AWQ. Don't pass `--quantization awq`; let vLLM auto-detect.
+- `Failed to initialize NVML: Driver/library version mismatch`: the NVIDIA driver was updated but the box wasn't rebooted. Reboot.
 
 ## Links
 
