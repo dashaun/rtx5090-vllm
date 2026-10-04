@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Wait for the vLLM health endpoint to come up, with a timeout.
 # Ensures the systemd unit doesn't report "active" while the model is
-# still loading (first start downloads ~16 GB of weights).
+# still loading (first start downloads ~22 GB of weights).
 set -euo pipefail
 
 URL="${1:-http://127.0.0.1:8000/health}"
-TIMEOUT="${2:-900}"
+TIMEOUT="${2:-1800}"
 INTERVAL="${3:-5}"
 
 elapsed=0
