@@ -14,7 +14,8 @@ vLLM serving Qwen3.8-27B on an RTX 5090 via Docker. OpenAI-compatible API with v
 - 27B dense, mixed NVFP4/FP8 quantization (NVIDIA Model Optimizer): NVFP4 on MLP + lm_head, FP8 on attention. ~22 GB download, ~20.4 GiB VRAM once loaded
 - Native Blackwell (sm_120) NVFP4 support, so no special quantization flags
 - VLM: text, image, and video input (`Qwen3_5ForConditionalGeneration` with a vision tower)
-- Hybrid attention: 16 of 64 layers are full attention, the rest linear. With `--kv-cache-dtype fp8_e4m3` that is ~32 KiB of KV per token, so 131072 context costs ~4.3 GiB and fits with ~4 GiB headroom at 0.92 utilization. Native max is 262144, which does not fit on 32 GB
+- Hybrid attention: 16 of 64 layers are full attention, the rest linear. With `--kv-cache-dtype fp8_e4m3` and the flags below, 131072 context fits with a ~198K token KV pool (about 1.5x concurrency at 128K per request). Native max is 262144, which does not fit on 32 GB
+- Two memory settings matter for 128K: `--max-num-seqs 32` (the default 256 inflates the linear-attention state cache until KV allocation OOMs) and a limited `--cudagraph_capture_sizes` (default capture sizes up to 512 cost ~2 GiB more). `--gpu-memory-utilization 0.95` makes up the rest
 - Apache-2.0, not gated, no `HF_TOKEN` needed
 
 ## Prerequisites
