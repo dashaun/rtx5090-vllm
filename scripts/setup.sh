@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SERVICE=vllm-coder
+SERVICE=vllm
 
 if [[ $EUID -ne 0 ]]; then
   echo "Run as root: sudo ./scripts/setup.sh" >&2
@@ -53,4 +53,4 @@ sed "s|__REPO_DIR__|${REPO_DIR}|g" "${REPO_DIR}/systemd/${SERVICE}.service" \
 systemctl daemon-reload
 systemctl enable --now "${SERVICE}"
 
-echo "Done. Model downloads on first start (~16 GB), then serving at http://localhost:8000"
+echo "Done. Model downloads on first start (~22 GB), then serving at http://localhost:8000"

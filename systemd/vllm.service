@@ -1,5 +1,5 @@
 [Unit]
-Description=vLLM Qwen3-Coder (RTX 5090)
+Description=vLLM (RTX 5090)
 Wants=docker.service
 After=docker.service
 

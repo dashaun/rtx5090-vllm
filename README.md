@@ -6,16 +6,16 @@
 
 # rtx5090-vllm
 
-vLLM serving Qwen3-Coder-30B-A3B on an RTX 5090 via Docker. OpenAI-compatible API, auto-restarts on boot. This is the Ollama replacement for that box: one model, no swap logic, no keep-alive tuning.
+vLLM serving Qwen3.8-27B on an RTX 5090 via Docker. OpenAI-compatible API with vision, auto-restarts on boot. This is the Ollama replacement for that box: one model, no swap logic, no keep-alive tuning.
 
 ## Why this model
 
-- `cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit`, served as `qwen3-coder`
-- 30B total / 3.3B active (MoE), so it stays responsive on a single consumer GPU
-- INT4 quantized (compressed-tensors, despite "AWQ" in the name), ~16 GB download, ~16-18 GB VRAM once loaded
-- 98304 token context. After weights load, vLLM has ~9.8 GiB left for KV cache (~107K tokens), so 96K fits for one request at a time. Native is 262144, which does not fit on 32 GB
-
-The official Qwen AWQ build is gated behind an HF license, and the official FP8 build is ~30.5 GB with no headroom left for a 32 GB card. This one is open and auto-detected by vLLM as compressed-tensors, so no `--quantization` flag needed.
+- `nvidia/Qwen3.8-27B-NVFP4`, served as `qwen3.8-27b`
+- 27B dense, mixed NVFP4/FP8 quantization (NVIDIA Model Optimizer): NVFP4 on MLP + lm_head, FP8 on attention. ~22 GB download, ~20.4 GiB VRAM once loaded
+- Native Blackwell (sm_120) NVFP4 support, so no special quantization flags
+- VLM: text, image, and video input (`Qwen3_5ForConditionalGeneration` with a vision tower)
+- Hybrid attention: 16 of 64 layers are full attention, the rest linear. With `--kv-cache-dtype fp8_e4m3` that is ~32 KiB of KV per token, so 131072 context costs ~4.3 GiB and fits with ~4 GiB headroom at 0.92 utilization. Native max is 262144, which does not fit on 32 GB
+- Apache-2.0, not gated, no `HF_TOKEN` needed
 
 ## Prerequisites
 
@@ -37,7 +37,7 @@ What the script does:
 4. Installs a systemd unit pinned to this clone path
 5. Runs `docker compose up -d`
 
-First start downloads ~16 GB of weights. Give it a few minutes before the port opens. The systemd unit waits for the `/health` endpoint before reporting the service as active, and the container exposes a Docker healthcheck, so a half-loaded model never counts as "up".
+First start downloads ~22 GB of weights. Give it a few minutes before the port opens. The systemd unit waits for the `/health` endpoint before reporting the service as active, and the container exposes a Docker healthcheck, so a half-loaded model never counts as "up".
 
 ## Verify
 
@@ -46,10 +46,10 @@ curl localhost:8000/v1/models
 
 curl -s localhost:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"model": "qwen3-coder", "messages": [{"role": "user", "content": "Write a fibonacci function in rust"}]}'
+  -d '{"model": "qwen3.8-27b", "messages": [{"role": "user", "content": "Write a fibonacci function in rust"}]}'
 ```
 
-Point any OpenAI client at `http://<host>:8000/v1` with `model=qwen3-coder`.
+Point any OpenAI client at `http://<host>:8000/v1` with `model=qwen3.8-27b`.
 
 ## Restart on reboot
 
@@ -60,9 +60,9 @@ Two layers of protection:
 ## Managing it
 
 ```bash
-sudo systemctl status vllm-coder    # logs + status
-sudo systemctl restart vllm-coder
-sudo systemctl stop vllm-coder
+sudo systemctl status vllm    # logs + status
+sudo systemctl restart vllm
+sudo systemctl stop vllm
 docker compose logs -f              # vLLM engine logs
 ```
 
@@ -73,7 +73,8 @@ Everything lives in `docker-compose.yml`:
 - **Swap the model**: change the `--model` line. HF models are auto-detected; add `--quantization awq` for AWQ repos.
 - **Context length**: adjust `--max-model-len`. vLLM reserves the KV cache from `--gpu-memory-utilization` either way, so this only caps a single request. It must fit in the `GPU KV cache size` from the startup log (`docker compose logs | grep "KV cache size"`). Your client (Cline, Qwen Code) has its own context setting; match it, leaving room for `max_tokens`.
 - **Gated models**: copy `.env.example` to `.env`, set `HF_TOKEN` (needed for Llama 3.x or Qwen's official AWQ build).
-- **Tool calling**: already enabled for agentic coding setups (Cline, Qwen Code) via `--enable-auto-tool-choice` and `--tool-call-parser qwen3_coder`.
+- **Tool calling**: already enabled for agentic coding setups (Cline, Qwen Code) via `--enable-auto-tool-choice` and `--tool-call-parser qwen3_coder`, per the NVIDIA model card.
+- **Reasoning**: `--reasoning-parser qwen3` separates the thinking tokens from the answer in the OpenAI-compatible output and returns them as `reasoning_content`.
 
 Model weights cache to `<repo>/.cache/huggingface` on the host (gitignored), regardless of which user runs compose. Delete it to force a fresh download.
 
